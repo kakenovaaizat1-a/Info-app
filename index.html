@@ -1,483 +1,266 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#1E3A8A">
-<title>Школьный Парламент</title>
-
-<!-- PWA manifest (inline via data URI so the whole app stays in one file) -->
-<link rel="manifest" id="manifestLink">
-
-<!-- Tailwind CSS via CDN -->
-<script src="https://cdn.tailwindcss.com"></script>
-<script>
-  tailwind.config = {
-    theme: {
-      extend: {
-        colors: {
-          navy: {
-            50: '#eef2fb', 100: '#d6e0f5', 500: '#2C4A9E',
-            600: '#22397D', 700: '#1B2E63', 800: '#152449', 900: '#101A35'
-          },
-          gold: {
-            400: '#E3B23C', 500: '#D6A02B', 600: '#B98620'
-          }
-        },
-        fontFamily: {
-          sans: ['Segoe UI', 'Roboto', 'Helvetica', 'Arial', 'sans-serif']
-        }
-      }
-    }
-  }
-</script>
-
-<style>
-  html, body { height: 100%; }
-  body {
-    -webkit-tap-highlight-color: transparent;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-  /* Simple fade/slide for the reminder banner */
-  .banner-enter {
-    animation: bannerDown .25s ease-out;
-  }
-  @keyframes bannerDown {
-    from { transform: translateY(-100%); opacity: 0; }
-    to   { transform: translateY(0);      opacity: 1; }
-  }
-  .modal-enter {
-    animation: modalIn .18s ease-out;
-  }
-  @keyframes modalIn {
-    from { transform: scale(.95); opacity: 0; }
-    to   { transform: scale(1);   opacity: 1; }
-  }
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Школьный Парламент</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#1e293b">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-20">
 
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col">
-
-  <!-- ============ DEADLINE / EVENT REMINDER BANNER ============ -->
-  <div id="eventBanner" class="hidden fixed top-0 left-0 right-0 z-40 banner-enter">
-    <div class="bg-gold-500 text-navy-900 px-4 py-3 shadow-md flex items-start gap-3">
-      <span class="text-xl leading-none mt-0.5">⏰</span>
-      <div class="flex-1 text-sm leading-snug">
-        <p id="eventBannerText" class="font-semibold"></p>
-      </div>
-      <button id="closeBanner" class="text-navy-900/70 hover:text-navy-900 text-lg leading-none px-1" aria-label="Закрыть">✕</button>
-    </div>
-  </div>
-
-  <!-- ============ HEADER ============ -->
-  <header class="bg-navy-700 text-white px-4 pt-5 pb-4 shadow-sm sticky top-0 z-20" id="appHeader">
-    <div class="flex items-center justify-between">
+  <!-- Header -->
+  <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-40">
+    <div class="max-w-md mx-auto flex justify-between items-center">
       <div>
-        <h1 class="text-lg font-bold tracking-tight">Школьный Парламент</h1>
-        <p class="text-navy-100 text-xs mt-0.5">Голос учеников — вместе решаем</p>
+        <h1 class="text-xl font-bold tracking-wide">Школьный Парламент</h1>
+        <p class="text-xs text-slate-400">Голос учеников — будущее школы</p>
       </div>
-      <button id="notifBtn"
-        class="bg-navy-600 hover:bg-navy-500 active:scale-95 transition text-white text-xs font-medium px-3 py-2 rounded-lg flex items-center gap-1.5 shrink-0">
-        <span>🔔</span><span class="hidden xs:inline">Уведомления</span>
+      <button onclick="toggleAdminModal()" id="adminBtn" class="bg-indigo-600 hover:bg-indigo-700 text-xs px-3 py-1.5 rounded-lg transition font-medium">
+        🔑 Админ
       </button>
     </div>
   </header>
 
-  <!-- ============ MAIN CONTENT ============ -->
-  <main class="flex-1 max-w-2xl w-full mx-auto px-4 py-4 pb-24">
+  <!-- Main Container -->
+  <main class="max-w-md mx-auto p-4 space-y-6">
 
-    <!-- Loading state -->
-    <div id="loadingState" class="text-center py-16 text-slate-400">
-      <p class="text-sm">Загрузка данных…</p>
+    <!-- Admin Banner Status -->
+    <div id="adminBadge" class="hidden bg-emerald-100 border border-emerald-400 text-emerald-800 text-xs px-3 py-2 rounded-lg flex justify-between items-center">
+      <span>⚙️ Вы вошли как <strong>Администратор</strong></span>
+      <button onclick="logoutAdmin()" class="text-emerald-900 underline font-bold">Выйти</button>
     </div>
 
-    <!-- Error state -->
-    <div id="errorState" class="hidden text-center py-16 text-slate-500">
-      <p class="text-sm">Не удалось загрузить данные из <code class="bg-slate-200 px-1 rounded">data.json</code>.</p>
-      <p class="text-xs mt-1 text-slate-400">Проверьте, что файл находится рядом с index.html.</p>
+    <!-- Navigation Tabs -->
+    <div class="flex border-b border-slate-300 text-sm font-medium">
+      <button id="tabCandidates" onclick="switchTab('candidates')" class="flex-1 py-2 text-center border-b-2 border-indigo-600 font-bold text-indigo-600">Кандидаты</button>
+      <button id="tabEvents" onclick="switchTab('events')" class="flex-1 py-2 text-center text-slate-500 border-b-2 border-transparent">Мероприятия</button>
     </div>
 
-    <!-- CANDIDATES TAB -->
-    <section id="tab-candidates" class="hidden">
-      <h2 class="text-base font-bold text-navy-800 mb-3">Кандидаты</h2>
-      <div id="candidatesList" class="space-y-3"></div>
+    <!-- Candidates Section -->
+    <section id="sectionCandidates" class="space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold text-slate-900">Кандидаты в Парламент</h2>
+        <button id="addCandidateBtn" onclick="openAddCandidateModal()" class="hidden bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow">
+          + Добавить
+        </button>
+      </div>
+      <div id="candidatesList" class="space-y-4"></div>
     </section>
 
-    <!-- EVENTS TAB -->
-    <section id="tab-events" class="hidden">
-      <h2 class="text-base font-bold text-navy-800 mb-3">Мероприятия</h2>
+    <!-- Events Section -->
+    <section id="sectionEvents" class="space-y-4 hidden">
+      <div class="flex justify-between items-center">
+        <h2 class="text-lg font-bold text-slate-900">Календарь событий</h2>
+        <button id="addEventBtn" onclick="openAddEventModal()" class="hidden bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow">
+          + Добавить
+        </button>
+      </div>
       <div id="eventsList" class="space-y-3"></div>
     </section>
 
   </main>
 
-  <!-- ============ BOTTOM NAVIGATION ============ -->
-  <nav class="fixed bottom-0 left-0 right-0 z-30 bg-white border-t border-slate-200 shadow-[0_-2px_8px_rgba(0,0,0,0.05)]"
-       style="padding-bottom: env(safe-area-inset-bottom);">
-    <div class="max-w-2xl mx-auto grid grid-cols-2">
-      <button data-tab="candidates" class="nav-btn flex flex-col items-center justify-center gap-0.5 py-2.5 text-slate-400">
-        <span class="text-xl">👥</span>
-        <span class="text-[11px] font-medium">Кандидаты</span>
-      </button>
-      <button data-tab="events" class="nav-btn flex flex-col items-center justify-center gap-0.5 py-2.5 text-slate-400">
-        <span class="text-xl">📅</span>
-        <span class="text-[11px] font-medium">Мероприятия</span>
-      </button>
-    </div>
-  </nav>
-
-  <!-- ============ RESTRICTED QUESTION MODAL ============ -->
-  <div id="questionModal" class="hidden fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 px-4">
-    <div class="modal-enter bg-white rounded-2xl w-full sm:max-w-sm p-5 mb-4 sm:mb-0 shadow-xl">
-      <div class="flex items-start gap-3">
-        <span class="text-2xl">🚫</span>
+  <!-- Candidate Details / Question Modal -->
+  <div id="candidateModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden z-50">
+    <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-start">
         <div>
-          <h3 class="font-bold text-navy-800 text-sm mb-1.5">Доступ ограничен</h3>
-          <p class="text-sm text-slate-600 leading-snug">
-            Задавать вопросы кандидатам имеет право только администрация школы и Школьный Парламент во время дебатов.
-          </p>
+          <span id="modalCandidateId" class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">ID</span>
+          <h3 id="modalCandidateName" class="text-xl font-bold text-slate-900 mt-1"></h3>
+          <p id="modalCandidateRole" class="text-xs text-indigo-600 font-medium"></p>
         </div>
+        <button onclick="closeCandidateModal()" class="text-slate-400 text-xl font-bold">✕</button>
       </div>
-      <button id="closeQuestionModal"
-        class="mt-4 w-full bg-navy-700 hover:bg-navy-600 text-white text-sm font-semibold py-2.5 rounded-xl transition">
-        Понятно
-      </button>
+
+      <div class="bg-slate-50 p-3 rounded-lg border text-sm text-slate-700">
+        <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider mb-1">Предвыборная программа</h4>
+        <p id="modalCandidateProgram"></p>
+      </div>
+
+      <!-- Question Form -->
+      <div class="border-t pt-3 space-y-2">
+        <h4 class="font-bold text-sm text-slate-800">Задать вопрос кандидату</h4>
+        <textarea id="questionInput" rows="2" placeholder="Напишите ваш вопрос..." class="w-full text-sm border p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
+        <button onclick="sendQuestion()" class="w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-lg hover:bg-indigo-700 transition">
+          Отправить вопрос
+        </button>
+      </div>
     </div>
   </div>
 
-  <!-- ============ TOAST (for push-permission feedback) ============ -->
-  <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-navy-900 text-white text-xs px-4 py-2.5 rounded-full shadow-lg"></div>
+  <!-- Admin Login Modal -->
+  <div id="adminModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
+    <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4">
+      <h3 class="text-lg font-bold text-slate-900 text-center">Панель администратора</h3>
+      <input type="password" id="adminPassword" placeholder="Введите пароль" class="w-full border p-2 text-sm rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
+      <div class="flex space-x-2">
+        <button onclick="toggleAdminModal()" class="flex-1 bg-slate-200 text-xs py-2 rounded-lg font-medium">Отмена</button>
+        <button onclick="loginAdmin()" class="flex-1 bg-indigo-600 text-white text-xs py-2 rounded-lg font-medium">Войти</button>
+      </div>
+    </div>
+  </div>
 
-<script>
-(function () {
-  'use strict';
-
-  // ---------------------------------------------------------------
-  // Inline PWA manifest (so the whole app is a single index.html file)
-  // ---------------------------------------------------------------
-  const manifest = {
-    name: "Школьный Парламент",
-    short_name: "Парламент",
-    start_url: "./index.html",
-    display: "standalone",
-    background_color: "#1E3A8A",
-    theme_color: "#1E3A8A",
-    icons: [
+  <script>
+    let candidates = [
       {
-        src: "data:image/svg+xml," + encodeURIComponent(
-          '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">' +
-          '<rect width="100" height="100" rx="20" fill="%231E3A8A"/>' +
-          '<text x="50" y="66" font-size="55" text-anchor="middle" fill="%23E3B23C" font-family="sans-serif">🏛</text>' +
-          '</svg>'
-        ),
-        sizes: "192x192",
-        type: "image/svg+xml"
+        id: "CAND-001",
+        name: "Алихан Сарсенов",
+        role: "Кандидат в Президенты",
+        grade: "10B класс",
+        program: "Введение школьного радио, проведение киберспортивного турнира и день самоуправления каждый месяц.",
+        votes: 142
+      },
+      {
+        id: "CAND-002",
+        name: "Аружан Нурланова",
+        role: "Пресс-секретарь",
+        grade: "10A класс",
+        program: "Запуск школьного Telegram-канала, еженедельная дайджест-газета и фотозоны на мероприятиях.",
+        votes: 98
       }
-    ]
-  };
-  const manifestBlob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
-  document.getElementById('manifestLink').setAttribute('href', URL.createObjectURL(manifestBlob));
+    ];
 
-  // ---------------------------------------------------------------
-  // State
-  // ---------------------------------------------------------------
-  let appData = { candidates: [], events: [] };
-  let currentTab = 'candidates';
+    let events = [
+      { id: "EVT-1", title: "Предвыборные дебаты", date: "2026-09-20", location: "Актовый зал" },
+      { id: "EVT-2", title: "День голосования", date: "2026-09-25", location: "Холл 1 этажа" }
+    ];
 
-  const el = {
-    loading: document.getElementById('loadingState'),
-    error: document.getElementById('errorState'),
-    tabCandidates: document.getElementById('tab-candidates'),
-    tabEvents: document.getElementById('tab-events'),
-    candidatesList: document.getElementById('candidatesList'),
-    eventsList: document.getElementById('eventsList'),
-    navBtns: document.querySelectorAll('.nav-btn'),
-    banner: document.getElementById('eventBanner'),
-    bannerText: document.getElementById('eventBannerText'),
-    closeBanner: document.getElementById('closeBanner'),
-    modal: document.getElementById('questionModal'),
-    closeModal: document.getElementById('closeQuestionModal'),
-    notifBtn: document.getElementById('notifBtn'),
-    toast: document.getElementById('toast')
-  };
+    let currentCandidate = null;
+    let isAdmin = false;
 
-  // ---------------------------------------------------------------
-  // Utilities
-  // ---------------------------------------------------------------
-  function showToast(msg, duration = 2500) {
-    el.toast.textContent = msg;
-    el.toast.classList.remove('hidden');
-    clearTimeout(showToast._t);
-    showToast._t = setTimeout(() => el.toast.classList.add('hidden'), duration);
-  }
+    function renderCandidates() {
+      const container = document.getElementById('candidatesList');
+      container.innerHTML = candidates.map(c => `
+        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="text-[10px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">${c.id}</span>
+              <h3 class="font-bold text-slate-900 text-base mt-1">${c.name}</h3>
+              <p class="text-xs text-slate-500">${c.role} • ${c.grade}</p>
+            </div>
+            ${isAdmin ? `<button onclick="deleteCandidate('${c.id}')" class="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">Удалить</button>` : ''}
+          </div>
+          <p class="text-xs text-slate-600 line-clamp-2">${c.program}</p>
+          <button onclick="openCandidateModal('${c.id}')" class="w-full bg-slate-900 hover:bg-indigo-600 text-white text-xs py-2 rounded-lg transition font-medium">
+            Подробнее и задать вопрос
+          </button>
+        </div>
+      `).join('');
+    }
 
-  function formatDate(dateStr) {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
+    function renderEvents() {
+      const container = document.getElementById('eventsList');
+      container.innerHTML = events.map(e => `
+        <div class="bg-white border border-slate-200 p-3 rounded-xl flex justify-between items-center">
+          <div>
+            <h4 class="font-bold text-sm text-slate-800">${e.title}</h4>
+            <p class="text-xs text-slate-500">📅 ${e.date} • 📍 ${e.location}</p>
+          </div>
+          ${isAdmin ? `<button onclick="deleteEvent('${e.id}')" class="text-red-500 text-xs font-bold">✕</button>` : ''}
+        </div>
+      `).join('');
+    }
 
-  function daysUntil(dateStr) {
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const target = new Date(dateStr);
-    const targetDay = new Date(target.getFullYear(), target.getMonth(), target.getDate());
-    const msPerDay = 1000 * 60 * 60 * 24;
-    return Math.round((targetDay - today) / msPerDay);
-  }
+    function openCandidateModal(id) {
+      currentCandidate = candidates.find(c => c.id === id);
+      if (!currentCandidate) return;
 
-  // ---------------------------------------------------------------
-  // Data loading
-  // ---------------------------------------------------------------
-  function loadData() {
-    fetch('./data.json')
-      .then(function (res) {
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
-      .then(function (data) {
-        appData.candidates = Array.isArray(data.candidates) ? data.candidates : [];
-        appData.events = Array.isArray(data.events) ? data.events : [];
-        el.loading.classList.add('hidden');
+      document.getElementById('modalCandidateId').innerText = currentCandidate.id;
+      document.getElementById('modalCandidateName').innerText = currentCandidate.name;
+      document.getElementById('modalCandidateRole').innerText = `${currentCandidate.role} (${currentCandidate.grade})`;
+      document.getElementById('modalCandidateProgram').innerText = currentCandidate.program;
+
+      document.getElementById('candidateModal').classList.remove('hidden');
+    }
+
+    function closeCandidateModal() {
+      document.getElementById('candidateModal').classList.add('hidden');
+    }
+
+    function sendQuestion() {
+      const text = document.getElementById('questionInput').value.trim();
+      if (!text) return alert("Введите вопрос!");
+      alert(`Ваш вопрос кандидату ${currentCandidate.name} успешно отправлен!`);
+      document.getElementById('questionInput').value = '';
+      closeCandidateModal();
+    }
+
+    function toggleAdminModal() {
+      document.getElementById('adminModal').classList.toggle('hidden');
+    }
+
+    function loginAdmin() {
+      const pass = document.getElementById('adminPassword').value;
+      if (pass === 'admin2026') {
+        isAdmin = true;
+        document.getElementById('adminBadge').classList.remove('hidden');
+        document.getElementById('addCandidateBtn').classList.remove('hidden');
+        document.getElementById('addEventBtn').classList.remove('hidden');
+        document.getElementById('adminBtn').classList.add('hidden');
+        toggleAdminModal();
         renderCandidates();
         renderEvents();
-        checkUpcomingEvents();
-        switchTab('candidates');
-      })
-      .catch(function (err) {
-        console.error('Ошибка загрузки data.json:', err);
-        el.loading.classList.add('hidden');
-        el.error.classList.remove('hidden');
-      });
-  }
-
-  // ---------------------------------------------------------------
-  // Rendering: Candidates
-  // ---------------------------------------------------------------
-  function renderCandidates() {
-    el.candidatesList.innerHTML = '';
-
-    if (appData.candidates.length === 0) {
-      el.candidatesList.innerHTML =
-        '<p class="text-sm text-slate-400 text-center py-8">Пока нет зарегистрированных кандидатов.</p>';
-      return;
-    }
-
-    appData.candidates.forEach(function (candidate) {
-      const card = document.createElement('article');
-      card.className = 'bg-white rounded-2xl p-4 shadow-sm border border-slate-100 flex gap-3';
-
-      const photoHtml = candidate.photo
-        ? '<img src="' + escapeAttr(candidate.photo) + '" alt="' + escapeAttr(candidate.name || '') +
-          '" class="w-16 h-16 rounded-xl object-cover shrink-0 bg-slate-100">'
-        : '<div class="w-16 h-16 rounded-xl shrink-0 bg-navy-100 flex items-center justify-center text-2xl">🙋</div>';
-
-      const name = escapeHtml(candidate.name || 'Без имени');
-      const grade = candidate.grade ? escapeHtml(candidate.grade) + ' класс' : '';
-      const position = candidate.position ? escapeHtml(candidate.position) : '';
-      const bio = candidate.bio ? escapeHtml(candidate.bio) : '';
-
-      card.innerHTML =
-        photoHtml +
-        '<div class="flex-1 min-w-0">' +
-          '<div class="flex items-start justify-between gap-2">' +
-            '<div>' +
-              '<h3 class="font-semibold text-sm text-navy-800">' + name + '</h3>' +
-              '<p class="text-xs text-slate-400 mt-0.5">' + [grade, position].filter(Boolean).join(' · ') + '</p>' +
-            '</div>' +
-          '</div>' +
-          (bio ? '<p class="text-xs text-slate-600 mt-2 leading-snug">' + bio + '</p>' : '') +
-          '<button class="ask-question-btn mt-3 text-xs font-medium text-navy-600 bg-navy-50 hover:bg-navy-100 px-3 py-1.5 rounded-lg transition">' +
-            '💬 Задать вопрос' +
-          '</button>' +
-        '</div>';
-
-      el.candidatesList.appendChild(card);
-    });
-
-    // Attach listeners for the restricted "ask question" buttons
-    document.querySelectorAll('.ask-question-btn').forEach(function (btn) {
-      btn.addEventListener('click', openQuestionModal);
-    });
-  }
-
-  // ---------------------------------------------------------------
-  // Rendering: Events
-  // ---------------------------------------------------------------
-  function renderEvents() {
-    el.eventsList.innerHTML = '';
-
-    if (appData.events.length === 0) {
-      el.eventsList.innerHTML =
-        '<p class="text-sm text-slate-400 text-center py-8">Мероприятий пока не запланировано.</p>';
-      return;
-    }
-
-    const sorted = appData.events.slice().sort(function (a, b) {
-      return new Date(a.date) - new Date(b.date);
-    });
-
-    sorted.forEach(function (event) {
-      const diff = daysUntil(event.date);
-      const soon = diff >= 0 && diff <= 2;
-
-      const card = document.createElement('article');
-      card.className = 'bg-white rounded-2xl p-4 shadow-sm border ' +
-        (soon ? 'border-gold-500' : 'border-slate-100');
-
-      const title = escapeHtml(event.title || 'Без названия');
-      const description = event.description ? escapeHtml(event.description) : '';
-      const location = event.location ? escapeHtml(event.location) : '';
-
-      card.innerHTML =
-        '<div class="flex items-start justify-between gap-2">' +
-          '<div>' +
-            '<h3 class="font-semibold text-sm text-navy-800">' + title + '</h3>' +
-            '<p class="text-xs text-slate-500 mt-0.5">📅 ' + formatDate(event.date) + (location ? ' · 📍 ' + location : '') + '</p>' +
-          '</div>' +
-          (soon ? '<span class="shrink-0 text-[10px] font-semibold bg-gold-500 text-navy-900 px-2 py-1 rounded-full whitespace-nowrap">Скоро</span>' : '') +
-        '</div>' +
-        (description ? '<p class="text-xs text-slate-600 mt-2 leading-snug">' + description + '</p>' : '');
-
-      el.eventsList.appendChild(card);
-    });
-  }
-
-  function escapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = String(str);
-    return div.innerHTML;
-  }
-  function escapeAttr(str) {
-    return String(str).replace(/"/g, '&quot;');
-  }
-
-  // ---------------------------------------------------------------
-  // Bottom navigation
-  // ---------------------------------------------------------------
-  function switchTab(tab) {
-    currentTab = tab;
-    el.tabCandidates.classList.toggle('hidden', tab !== 'candidates');
-    el.tabEvents.classList.toggle('hidden', tab !== 'events');
-
-    el.navBtns.forEach(function (btn) {
-      const active = btn.dataset.tab === tab;
-      btn.classList.toggle('text-navy-700', active);
-      btn.classList.toggle('text-slate-400', !active);
-    });
-  }
-
-  el.navBtns.forEach(function (btn) {
-    btn.addEventListener('click', function () {
-      switchTab(btn.dataset.tab);
-    });
-  });
-
-  // ---------------------------------------------------------------
-  // Restricted question modal
-  // ---------------------------------------------------------------
-  function openQuestionModal() {
-    el.modal.classList.remove('hidden');
-  }
-  function closeQuestionModal() {
-    el.modal.classList.add('hidden');
-  }
-  el.closeModal.addEventListener('click', closeQuestionModal);
-  el.modal.addEventListener('click', function (e) {
-    if (e.target === el.modal) closeQuestionModal();
-  });
-
-  // ---------------------------------------------------------------
-  // Upcoming-event reminder banner
-  // ---------------------------------------------------------------
-  function checkUpcomingEvents() {
-    const upcoming = appData.events
-      .map(function (event) { return { event: event, diff: daysUntil(event.date) }; })
-      .filter(function (item) { return item.diff >= 0 && item.diff <= 2; })
-      .sort(function (a, b) { return a.diff - b.diff; });
-
-    if (upcoming.length === 0) {
-      el.banner.classList.add('hidden');
-      return;
-    }
-
-    const nearest = upcoming[0];
-    const dayWord = pluralizeDays(nearest.diff);
-    const whenText = nearest.diff === 0 ? 'сегодня' : dayWord;
-
-    el.bannerText.textContent =
-      '«' + (nearest.event.title || 'Мероприятие') + '» состоится ' + whenText +
-      ' (' + formatDate(nearest.event.date) + '). Не пропустите!';
-
-    el.banner.classList.remove('hidden');
-  }
-
-  function pluralizeDays(n) {
-    if (n === 1) return 'через 1 день';
-    if (n === 2) return 'через 2 дня';
-    return 'через ' + n + ' дней';
-  }
-
-  el.closeBanner.addEventListener('click', function () {
-    el.banner.classList.add('hidden');
-  });
-
-  // ---------------------------------------------------------------
-  // Push notification permission
-  // ---------------------------------------------------------------
-  el.notifBtn.addEventListener('click', function () {
-    if (!('Notification' in window)) {
-      showToast('Этот браузер не поддерживает уведомления.');
-      return;
-    }
-
-    if (Notification.permission === 'granted') {
-      showToast('Уведомления уже разрешены ✅');
-      return;
-    }
-
-    if (Notification.permission === 'denied') {
-      showToast('Уведомления заблокированы в настройках браузера.');
-      return;
-    }
-
-    Notification.requestPermission().then(function (permission) {
-      if (permission === 'granted') {
-        showToast('Уведомления включены ✅');
-        try {
-          new Notification('Школьный Парламент', {
-            body: 'Уведомления успешно подключены. Мы будем напоминать о мероприятиях.'
-          });
-        } catch (e) { /* некоторые браузеры на мобильных требуют Service Worker — игнорируем */ }
+        alert('Вы успешно вошли как Администратор!');
       } else {
-        showToast('Уведомления не были разрешены.');
+        alert('Неверный пароль!');
       }
-    });
-  });
+    }
 
-  // ---------------------------------------------------------------
-  // Service worker registration (optional offline support)
-  // ---------------------------------------------------------------
-  if ('serviceWorker' in navigator) {
-    const swCode =
-      "self.addEventListener('install', e => self.skipWaiting());" +
-      "self.addEventListener('activate', e => self.clients.claim());" +
-      "self.addEventListener('fetch', e => {});";
-    const swBlob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(swBlob);
-    navigator.serviceWorker.register(swUrl).catch(function (err) {
-      console.warn('Service worker не зарегистрирован:', err);
-    });
-  }
+    function logoutAdmin() {
+      isAdmin = false;
+      document.getElementById('adminBadge').classList.add('hidden');
+      document.getElementById('addCandidateBtn').classList.add('hidden');
+      document.getElementById('addEventBtn').classList.add('hidden');
+      document.getElementById('adminBtn').classList.remove('hidden');
+      renderCandidates();
+      renderEvents();
+    }
 
-  // ---------------------------------------------------------------
-  // Init
-  // ---------------------------------------------------------------
-  loadData();
+    function openAddCandidateModal() {
+      const name = prompt("Имя и Фамилия кандидата:");
+      const role = prompt("Должность (например, Президент):");
+      const grade = prompt("Класс (например, 10B):");
+      const program = prompt("Предвыборная программа:");
 
-})();
-</script>
+      if (name && role) {
+        const newCand = {
+          id: `CAND-00${candidates.length + 1}`,
+          name,
+          role,
+          grade: grade || '10 класс',
+          program: program || 'Программа формируется.',
+          votes: 0
+        };
+        candidates.push(newCand);
+        renderCandidates();
+      }
+    }
+
+    function deleteCandidate(id) {
+      if (confirm("Удалить кандидата?")) {
+        candidates = candidates.filter(c => c.id !== id);
+        renderCandidates();
+      }
+    }
+
+    function switchTab(tab) {
+      if (tab === 'candidates') {
+        document.getElementById('sectionCandidates').classList.remove('hidden');
+        document.getElementById('sectionEvents').classList.add('hidden');
+        document.getElementById('tabCandidates').className = "flex-1 py-2 text-center border-b-2 border-indigo-600 font-bold text-indigo-600";
+        document.getElementById('tabEvents').className = "flex-1 py-2 text-center text-slate-500 border-b-2 border-transparent";
+      } else {
+        document.getElementById('sectionCandidates').classList.add('hidden');
+        document.getElementById('sectionEvents').classList.remove('hidden');
+        document.getElementById('tabEvents').className = "flex-1 py-2 text-center border-b-2 border-indigo-600 font-bold text-indigo-600";
+        document.getElementById('tabCandidates').className = "flex-1 py-2 text-center text-slate-500 border-b-2 border-transparent";
+      }
+    }
+
+    renderCandidates();
+    renderEvents();
+  </script>
 </body>
 </html>
