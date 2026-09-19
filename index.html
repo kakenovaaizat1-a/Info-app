@@ -195,15 +195,6 @@
             color: var(--text-muted);
         }
 
-        .badge {
-            background: #e0e7ff;
-            color: var(--primary);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.75rem;
-            font-weight: 600;
-        }
-
         .program-title {
             font-weight: 600;
             font-size: 0.9rem;
@@ -326,7 +317,7 @@
             margin-bottom: 4px;
         }
 
-        .form-group input, .form-group textarea, .form-group select {
+        .form-group input, .form-group textarea {
             width: 100%;
             padding: 8px 12px;
             border: 1px solid var(--border);
@@ -395,10 +386,10 @@
         </div>
     </div>
 
-    <!-- Модальное окно регистрации/добавления кандидата -->
+    <!-- Модальное окно регистрации кандидата -->
     <div id="candidateModal" class="modal-overlay">
         <div class="modal">
-            <h2 id="candModalTitle">Регистрация кандидата</h2>
+            <h2>Регистрация кандидата</h2>
             <div class="form-group">
                 <label>ФИО ученика</label>
                 <input type="text" id="candName" placeholder="Например: Иван Иванов">
@@ -409,7 +400,7 @@
             </div>
             <div class="form-group">
                 <label>Желаемая должность</label>
-                <input type="text" id="candRole" placeholder="Например: Президент школы / Глава комитета">
+                <input type="text" id="candRole" placeholder="Например: Президент школы">
             </div>
             <div class="form-group">
                 <label>Предвыборная программа</label>
@@ -422,7 +413,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно добавления вопроса кандидату (доступно админу) -->
+    <!-- Модальное окно вопроса -->
     <div id="questionModal" class="modal-overlay">
         <div class="modal">
             <h2>Задать вопрос кандидату</h2>
@@ -438,7 +429,7 @@
         </div>
     </div>
 
-    <!-- Модальное окно добавления мероприятия (Админ) -->
+    <!-- Модальное окно мероприятия -->
     <div id="eventModal" class="modal-overlay">
         <div class="modal">
             <h2>Новое мероприятие</h2>
@@ -469,7 +460,6 @@
         const ADMIN_PASS = "admin2026";
         let isAdmin = false;
 
-        // Данные по умолчанию
         let candidates = JSON.parse(localStorage.getItem('school_candidates')) || [
             {
                 id: 1,
@@ -491,7 +481,6 @@
             }
         ];
 
-        // Инициализация
         document.addEventListener('DOMContentLoaded', () => {
             renderCandidates();
             renderEvents();
@@ -515,7 +504,6 @@
             }
         }
 
-        // Авторизация
         function openAdminAuthModal() {
             document.getElementById('adminAuthModal').style.display = 'flex';
         }
@@ -543,7 +531,6 @@
             renderEvents();
         }
 
-        // Отрисовка кандидатов
         function renderCandidates() {
             const container = document.getElementById('candidatesList');
             container.innerHTML = '';
@@ -579,7 +566,6 @@
             });
         }
 
-        // Отрисовка мероприятий с кнопками Добавить в Календарь
         function renderEvents() {
             const container = document.getElementById('eventsList');
             container.innerHTML = '';
@@ -594,14 +580,25 @@
                     year: 'numeric'
                 });
 
-                // Формируем ссылку на Google Календарь
-                const gCalStart = event.date.replace(/-/g, '') + 'T' + event.time.replace(':', '') + '00';
-                const gCalEnd = event.date.replace(/-/g, '') + 'T' + (parseInt(event.time.split(':')[0]) + 1).toString().padStart(2, '0') + event.time.split(':')[1] + '00';
-                const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${gCalStart}/${gCalEnd}&details=${encodeURIComponent(event.desc)}`;
+                const startDateStr = event.date.replace(/-/g, '') + 'T' + event.time.replace(':', '') + '00';
+                const startHour = parseInt(event.time.split(':')[0], 10);
+                const endHour = (startHour + 1).toString().padStart(2, '0');
+                const endDateStr = event.date.replace(/-/g, '') + 'T' + endHour + event.time.split(':')[1] + '00';
 
-                // Формируем .ics файл для Apple/Outlook Календаря
-                const icsData = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${event.desc}\nDTSTART:${gCalStart}\nDTEND:${gCalEnd}\nEND:VEVENT\nEND:VCALENDAR`;
-                const icsBlobUrl = 'data:text/calendar;charset=utf8,' + encodeURIComponent(icsData);
+                const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateStr}/${endDateStr}&details=${encodeURIComponent(event.desc)}`;
+
+                const icsContent = [
+                    'BEGIN:VCALENDAR',
+                    'VERSION:2.0',
+                    'PRODID:-//School Parliament//Event//RU',
+                    'BEGIN:VEVENT',
+                    `SUMMARY:${event.title}`,
+                    `DESCRIPTION:${event.desc}`,
+                    `DTSTART:${startDateStr}`,
+                    `DTEND:${endDateStr}`,
+                    'END:VEVENT',
+                    'END:VCALENDAR'
+                ].join('\n');
 
                 card.innerHTML = `
                     <div class="card-header">
@@ -614,14 +611,25 @@
                     <div class="cal-dropdown">
                         <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; font-weight:600;">Напомнить:</span>
                         <a href="${gCalUrl}" target="_blank" class="cal-btn">🌐 Google Календарь</a>
-                        <a href="${icsBlobUrl}" download="${event.title}.ics" class="cal-btn">📱 Apple / Outlook</a>
+                        <a href="#" class="cal-btn" onclick="downloadIcs(event, '${encodeURIComponent(event.title)}', '${encodeURIComponent(icsContent)}')">📱 Apple / Outlook</a>
                     </div>
                 `;
                 container.appendChild(card);
             });
         }
 
-        // Операции с кандидатами
+        function downloadIcs(e, title, encodedContent) {
+            e.preventDefault();
+            const content = decodeURIComponent(encodedContent);
+            const blob = new Blob([content], { type: 'text/calendar;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `${decodeURIComponent(title)}.ics`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
         function openCandidateModal() {
             document.getElementById('candidateModal').style.display = 'flex';
         }
@@ -633,7 +641,7 @@
             const program = document.getElementById('candProgram').value;
 
             if(!name || !grade || !program) {
-                alert('Пожалуйста, заполните основные поля!');
+                alert('Заполните основные поля!');
                 return;
             }
 
@@ -647,7 +655,6 @@
             renderCandidates();
             closeModal('candidateModal');
 
-            // Очистка полей
             document.getElementById('candName').value = '';
             document.getElementById('candClass').value = '';
             document.getElementById('candRole').value = '';
@@ -655,14 +662,13 @@
         }
 
         function deleteCandidate(id) {
-            if(confirm('Вы уверены, что хотите удалить этого кандидата?')) {
+            if(confirm('Удалить этого кандидата?')) {
                 candidates = candidates.filter(c => c.id !== id);
                 saveData();
                 renderCandidates();
             }
         }
 
-        // Операции с вопросами
         function openQuestionModal(candidateId) {
             document.getElementById('targetCandidateId').value = candidateId;
             document.getElementById('questionModal').style.display = 'flex';
@@ -685,7 +691,6 @@
             document.getElementById('questionText').value = '';
         }
 
-        // Операции с мероприятиями
         function openEventModal() {
             document.getElementById('eventModal').style.display = 'flex';
         }
@@ -697,7 +702,7 @@
             const desc = document.getElementById('eventDesc').value;
 
             if(!title || !date) {
-                alert('Укажите название и дату мероприятия!');
+                alert('Укажите название и дату!');
                 return;
             }
 
