@@ -1,266 +1,731 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Школьный Парламент</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#1e293b">
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Школьное Самоуправление & Мероприятия</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-purple: #8b5cf6;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            line-height: 1.5;
+            padding-bottom: 60px;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary), #6366f1);
+            color: white;
+            padding: 24px 16px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+            position: relative;
+        }
+
+        header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 6px;
+        }
+
+        header p {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .admin-trigger-btn {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            backdrop-filter: blur(4px);
+        }
+
+        .admin-banner {
+            background-color: #d1fae5;
+            color: #065f46;
+            padding: 10px 16px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border-bottom: 1px solid #a7f3d0;
+            display: none;
+        }
+
+        .admin-banner button {
+            background: none;
+            border: none;
+            color: #047857;
+            text-decoration: underline;
+            margin-left: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .nav-tabs {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 14px 8px;
+            border: none;
+            background: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+        }
+
+        .container {
+            max-width: 768px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .actions-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            gap: 8px;
+        }
+
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+        }
+
+        .btn-success {
+            background-color: var(--accent-green);
+        }
+
+        .btn-danger {
+            background-color: var(--accent-red);
+        }
+
+        .btn-outline {
+            background: white;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            padding: 16px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .candidate-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        .candidate-meta {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .badge {
+            background: #e0e7ff;
+            color: var(--primary);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .program-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 10px;
+            margin-bottom: 4px;
+            color: var(--text);
+        }
+
+        .program-text {
+            font-size: 0.9rem;
+            color: #475569;
+            white-space: pre-line;
+        }
+
+        .questions-section {
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
+        }
+
+        .questions-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .q-item {
+            background: #f1f5f9;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 6px;
+        }
+
+        .q-author {
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .event-date {
+            display: inline-block;
+            background: #fef3c7;
+            color: #92400e;
+            font-weight: 700;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-bottom: 8px;
+        }
+
+        .event-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .event-desc {
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 12px;
+        }
+
+        .cal-dropdown {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .cal-btn {
+            font-size: 0.8rem;
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: #f8fafc;
+            color: var(--text);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .cal-btn:hover {
+            background: #e2e8f0;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            padding: 16px;
+        }
+
+        .modal {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 450px;
+        }
+
+        .modal h2 {
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-top: 16px;
+        }
+    </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans min-h-screen pb-20">
+<body>
 
-  <!-- Header -->
-  <header class="bg-slate-900 text-white p-4 shadow-lg sticky top-0 z-40">
-    <div class="max-w-md mx-auto flex justify-between items-center">
-      <div>
-        <h1 class="text-xl font-bold tracking-wide">Школьный Парламент</h1>
-        <p class="text-xs text-slate-400">Голос учеников — будущее школы</p>
-      </div>
-      <button onclick="toggleAdminModal()" id="adminBtn" class="bg-indigo-600 hover:bg-indigo-700 text-xs px-3 py-1.5 rounded-lg transition font-medium">
-        🔑 Админ
-      </button>
-    </div>
-  </header>
+    <header>
+        <button class="admin-trigger-btn" onclick="openAdminAuthModal()">🔑 Админ</button>
+        <h1>Школьное Самоуправление</h1>
+        <p>Кандидаты, программы и школьные мероприятия</p>
+    </header>
 
-  <!-- Main Container -->
-  <main class="max-w-md mx-auto p-4 space-y-6">
-
-    <!-- Admin Banner Status -->
-    <div id="adminBadge" class="hidden bg-emerald-100 border border-emerald-400 text-emerald-800 text-xs px-3 py-2 rounded-lg flex justify-between items-center">
-      <span>⚙️ Вы вошли как <strong>Администратор</strong></span>
-      <button onclick="logoutAdmin()" class="text-emerald-900 underline font-bold">Выйти</button>
+    <div id="adminBanner" class="admin-banner">
+        ⚙️ Вы вошли как Администратор <button onclick="logoutAdmin()">Выйти</button>
     </div>
 
-    <!-- Navigation Tabs -->
-    <div class="flex border-b border-slate-300 text-sm font-medium">
-      <button id="tabCandidates" onclick="switchTab('candidates')" class="flex-1 py-2 text-center border-b-2 border-indigo-600 font-bold text-indigo-600">Кандидаты</button>
-      <button id="tabEvents" onclick="switchTab('events')" class="flex-1 py-2 text-center text-slate-500 border-b-2 border-transparent">Мероприятия</button>
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('candidates')">👥 Кандидаты</button>
+        <button class="tab-btn" onclick="switchTab('events')">📅 Мероприятия</button>
     </div>
 
-    <!-- Candidates Section -->
-    <section id="sectionCandidates" class="space-y-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold text-slate-900">Кандидаты в Парламент</h2>
-        <button id="addCandidateBtn" onclick="openAddCandidateModal()" class="hidden bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow">
-          + Добавить
-        </button>
-      </div>
-      <div id="candidatesList" class="space-y-4"></div>
-    </section>
+    <div class="container">
 
-    <!-- Events Section -->
-    <section id="sectionEvents" class="space-y-4 hidden">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold text-slate-900">Календарь событий</h2>
-        <button id="addEventBtn" onclick="openAddEventModal()" class="hidden bg-emerald-600 text-white text-xs px-3 py-1.5 rounded-lg font-medium shadow">
-          + Добавить
-        </button>
-      </div>
-      <div id="eventsList" class="space-y-3"></div>
-    </section>
-
-  </main>
-
-  <!-- Candidate Details / Question Modal -->
-  <div id="candidateModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4 hidden z-50">
-    <div class="bg-white w-full max-w-md rounded-t-2xl sm:rounded-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-start">
-        <div>
-          <span id="modalCandidateId" class="text-xs font-mono bg-slate-100 text-slate-600 px-2 py-0.5 rounded">ID</span>
-          <h3 id="modalCandidateName" class="text-xl font-bold text-slate-900 mt-1"></h3>
-          <p id="modalCandidateRole" class="text-xs text-indigo-600 font-medium"></p>
-        </div>
-        <button onclick="closeCandidateModal()" class="text-slate-400 text-xl font-bold">✕</button>
-      </div>
-
-      <div class="bg-slate-50 p-3 rounded-lg border text-sm text-slate-700">
-        <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider mb-1">Предвыборная программа</h4>
-        <p id="modalCandidateProgram"></p>
-      </div>
-
-      <!-- Question Form -->
-      <div class="border-t pt-3 space-y-2">
-        <h4 class="font-bold text-sm text-slate-800">Задать вопрос кандидату</h4>
-        <textarea id="questionInput" rows="2" placeholder="Напишите ваш вопрос..." class="w-full text-sm border p-2 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"></textarea>
-        <button onclick="sendQuestion()" class="w-full bg-indigo-600 text-white text-sm font-medium py-2 rounded-lg hover:bg-indigo-700 transition">
-          Отправить вопрос
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Login Modal -->
-  <div id="adminModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 hidden z-50">
-    <div class="bg-white w-full max-w-xs rounded-2xl p-5 space-y-4">
-      <h3 class="text-lg font-bold text-slate-900 text-center">Панель администратора</h3>
-      <input type="password" id="adminPassword" placeholder="Введите пароль" class="w-full border p-2 text-sm rounded-lg outline-none focus:ring-2 focus:ring-indigo-500">
-      <div class="flex space-x-2">
-        <button onclick="toggleAdminModal()" class="flex-1 bg-slate-200 text-xs py-2 rounded-lg font-medium">Отмена</button>
-        <button onclick="loginAdmin()" class="flex-1 bg-indigo-600 text-white text-xs py-2 rounded-lg font-medium">Войти</button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    let candidates = [
-      {
-        id: "CAND-001",
-        name: "Алихан Сарсенов",
-        role: "Кандидат в Президенты",
-        grade: "10B класс",
-        program: "Введение школьного радио, проведение киберспортивного турнира и день самоуправления каждый месяц.",
-        votes: 142
-      },
-      {
-        id: "CAND-002",
-        name: "Аружан Нурланова",
-        role: "Пресс-секретарь",
-        grade: "10A класс",
-        program: "Запуск школьного Telegram-канала, еженедельная дайджест-газета и фотозоны на мероприятиях.",
-        votes: 98
-      }
-    ];
-
-    let events = [
-      { id: "EVT-1", title: "Предвыборные дебаты", date: "2026-09-20", location: "Актовый зал" },
-      { id: "EVT-2", title: "День голосования", date: "2026-09-25", location: "Холл 1 этажа" }
-    ];
-
-    let currentCandidate = null;
-    let isAdmin = false;
-
-    function renderCandidates() {
-      const container = document.getElementById('candidatesList');
-      container.innerHTML = candidates.map(c => `
-        <div class="bg-white border border-slate-200 p-4 rounded-xl shadow-sm space-y-3">
-          <div class="flex justify-between items-start">
-            <div>
-              <span class="text-[10px] font-mono bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded font-bold">${c.id}</span>
-              <h3 class="font-bold text-slate-900 text-base mt-1">${c.name}</h3>
-              <p class="text-xs text-slate-500">${c.role} • ${c.grade}</p>
+        <!-- Вкладка Кандидаты -->
+        <div id="candidatesTab" class="tab-content active">
+            <div class="actions-bar">
+                <button class="btn" onclick="openCandidateModal()">🙋‍♂️ Стать кандидатом</button>
+                <button id="addCandidateAdminBtn" class="btn btn-success btn-sm admin-only" style="display:none;" onclick="openCandidateModal()">+ Админ</button>
             </div>
-            ${isAdmin ? `<button onclick="deleteCandidate('${c.id}')" class="text-red-500 text-xs font-bold bg-red-50 px-2 py-1 rounded">Удалить</button>` : ''}
-          </div>
-          <p class="text-xs text-slate-600 line-clamp-2">${c.program}</p>
-          <button onclick="openCandidateModal('${c.id}')" class="w-full bg-slate-900 hover:bg-indigo-600 text-white text-xs py-2 rounded-lg transition font-medium">
-            Подробнее и задать вопрос
-          </button>
+            <div id="candidatesList"></div>
         </div>
-      `).join('');
-    }
 
-    function renderEvents() {
-      const container = document.getElementById('eventsList');
-      container.innerHTML = events.map(e => `
-        <div class="bg-white border border-slate-200 p-3 rounded-xl flex justify-between items-center">
-          <div>
-            <h4 class="font-bold text-sm text-slate-800">${e.title}</h4>
-            <p class="text-xs text-slate-500">📅 ${e.date} • 📍 ${e.location}</p>
-          </div>
-          ${isAdmin ? `<button onclick="deleteEvent('${e.id}')" class="text-red-500 text-xs font-bold">✕</button>` : ''}
+        <!-- Вкладка Мероприятия -->
+        <div id="eventsTab" class="tab-content">
+            <div class="actions-bar">
+                <button id="addEventAdminBtn" class="btn btn-success admin-only" style="display:none;" onclick="openEventModal()">+ Добавить мероприятие</button>
+            </div>
+            <div id="eventsList"></div>
         </div>
-      `).join('');
-    }
 
-    function openCandidateModal(id) {
-      currentCandidate = candidates.find(c => c.id === id);
-      if (!currentCandidate) return;
+    </div>
 
-      document.getElementById('modalCandidateId').innerText = currentCandidate.id;
-      document.getElementById('modalCandidateName').innerText = currentCandidate.name;
-      document.getElementById('modalCandidateRole').innerText = `${currentCandidate.role} (${currentCandidate.grade})`;
-      document.getElementById('modalCandidateProgram').innerText = currentCandidate.program;
+    <!-- Модальное окно авторизации Админа -->
+    <div id="adminAuthModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Вход для Администратора</h2>
+            <div class="form-group">
+                <label>Введите пароль:</label>
+                <input type="password" id="adminPasswordInput" placeholder="Пароль...">
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('adminAuthModal')">Отмена</button>
+                <button class="btn" onclick="loginAdmin()">Войти</button>
+            </div>
+        </div>
+    </div>
 
-      document.getElementById('candidateModal').classList.remove('hidden');
-    }
+    <!-- Модальное окно регистрации/добавления кандидата -->
+    <div id="candidateModal" class="modal-overlay">
+        <div class="modal">
+            <h2 id="candModalTitle">Регистрация кандидата</h2>
+            <div class="form-group">
+                <label>ФИО ученика</label>
+                <input type="text" id="candName" placeholder="Например: Иван Иванов">
+            </div>
+            <div class="form-group">
+                <label>Класс</label>
+                <input type="text" id="candClass" placeholder="Например: 10-А">
+            </div>
+            <div class="form-group">
+                <label>Желаемая должность</label>
+                <input type="text" id="candRole" placeholder="Например: Президент школы / Глава комитета">
+            </div>
+            <div class="form-group">
+                <label>Предвыборная программа</label>
+                <textarea id="candProgram" rows="4" placeholder="Расскажите о ваших идеях..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('candidateModal')">Отмена</button>
+                <button class="btn" onclick="saveCandidate()">Зарегистрироваться</button>
+            </div>
+        </div>
+    </div>
 
-    function closeCandidateModal() {
-      document.getElementById('candidateModal').classList.add('hidden');
-    }
+    <!-- Модальное окно добавления вопроса кандидату (доступно админу) -->
+    <div id="questionModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Задать вопрос кандидату</h2>
+            <div class="form-group">
+                <label>Вопрос от Администратора</label>
+                <textarea id="questionText" rows="3" placeholder="Введите ваш вопрос..."></textarea>
+            </div>
+            <input type="hidden" id="targetCandidateId">
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('questionModal')">Отмена</button>
+                <button class="btn" onclick="saveQuestion()">Отправить вопрос</button>
+            </div>
+        </div>
+    </div>
 
-    function sendQuestion() {
-      const text = document.getElementById('questionInput').value.trim();
-      if (!text) return alert("Введите вопрос!");
-      alert(`Ваш вопрос кандидату ${currentCandidate.name} успешно отправлен!`);
-      document.getElementById('questionInput').value = '';
-      closeCandidateModal();
-    }
+    <!-- Модальное окно добавления мероприятия (Админ) -->
+    <div id="eventModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Новое мероприятие</h2>
+            <div class="form-group">
+                <label>Название события</label>
+                <input type="text" id="eventTitle" placeholder="Например: Школьные Дебаты">
+            </div>
+            <div class="form-group">
+                <label>Дата проведения</label>
+                <input type="date" id="eventDate">
+            </div>
+            <div class="form-group">
+                <label>Время начала</label>
+                <input type="time" id="eventTime" value="15:00">
+            </div>
+            <div class="form-group">
+                <label>Описание</label>
+                <textarea id="eventDesc" rows="3" placeholder="Подробности события..."></textarea>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-outline" onclick="closeModal('eventModal')">Отмена</button>
+                <button class="btn btn-success" onclick="saveEvent()">Опубликовать</button>
+            </div>
+        </div>
+    </div>
 
-    function toggleAdminModal() {
-      document.getElementById('adminModal').classList.toggle('hidden');
-    }
+    <script>
+        const ADMIN_PASS = "admin2026";
+        let isAdmin = false;
 
-    function loginAdmin() {
-      const pass = document.getElementById('adminPassword').value;
-      if (pass === 'admin2026') {
-        isAdmin = true;
-        document.getElementById('adminBadge').classList.remove('hidden');
-        document.getElementById('addCandidateBtn').classList.remove('hidden');
-        document.getElementById('addEventBtn').classList.remove('hidden');
-        document.getElementById('adminBtn').classList.add('hidden');
-        toggleAdminModal();
-        renderCandidates();
-        renderEvents();
-        alert('Вы успешно вошли как Администратор!');
-      } else {
-        alert('Неверный пароль!');
-      }
-    }
+        // Данные по умолчанию
+        let candidates = JSON.parse(localStorage.getItem('school_candidates')) || [
+            {
+                id: 1,
+                name: "Айару Серикова",
+                grade: "11-Б",
+                role: "Президент школы",
+                program: "1. Проведение еженедельных тематических пятниц.\n2. Установка новых лавочек в холле.\n3. Организация киберспортивного турнира.",
+                questions: ["Каким будет первый проект из вашей программы?"]
+            }
+        ];
 
-    function logoutAdmin() {
-      isAdmin = false;
-      document.getElementById('adminBadge').classList.add('hidden');
-      document.getElementById('addCandidateBtn').classList.add('hidden');
-      document.getElementById('addEventBtn').classList.add('hidden');
-      document.getElementById('adminBtn').classList.remove('hidden');
-      renderCandidates();
-      renderEvents();
-    }
+        let events = JSON.parse(localStorage.getItem('school_events')) || [
+            {
+                id: 1,
+                title: "Предвыборные дебаты кандидатов",
+                date: "2026-09-25",
+                time: "15:00",
+                desc: "Встреча кандидатов в президенты школы с избирателями в актовом зале. Ответы на вопросы."
+            }
+        ];
 
-    function openAddCandidateModal() {
-      const name = prompt("Имя и Фамилия кандидата:");
-      const role = prompt("Должность (например, Президент):");
-      const grade = prompt("Класс (например, 10B):");
-      const program = prompt("Предвыборная программа:");
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCandidates();
+            renderEvents();
+        });
 
-      if (name && role) {
-        const newCand = {
-          id: `CAND-00${candidates.length + 1}`,
-          name,
-          role,
-          grade: grade || '10 класс',
-          program: program || 'Программа формируется.',
-          votes: 0
-        };
-        candidates.push(newCand);
-        renderCandidates();
-      }
-    }
+        function saveData() {
+            localStorage.setItem('school_candidates', JSON.stringify(candidates));
+            localStorage.setItem('school_events', JSON.stringify(events));
+        }
 
-    function deleteCandidate(id) {
-      if (confirm("Удалить кандидата?")) {
-        candidates = candidates.filter(c => c.id !== id);
-        renderCandidates();
-      }
-    }
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
 
-    function switchTab(tab) {
-      if (tab === 'candidates') {
-        document.getElementById('sectionCandidates').classList.remove('hidden');
-        document.getElementById('sectionEvents').classList.add('hidden');
-        document.getElementById('tabCandidates').className = "flex-1 py-2 text-center border-b-2 border-indigo-600 font-bold text-indigo-600";
-        document.getElementById('tabEvents').className = "flex-1 py-2 text-center text-slate-500 border-b-2 border-transparent";
-      } else {
-        document.getElementById('sectionCandidates').classList.add('hidden');
-        document.getElementById('sectionEvents').classList.remove('hidden');
-        document.getElementById('tabEvents').className = "flex-1 py-2 text-center border-b-2 border-indigo-600 font-bold text-indigo-600";
-        document.getElementById('tabCandidates').className = "flex-1 py-2 text-center text-slate-500 border-b-2 border-transparent";
-      }
-    }
+            if(tabName === 'candidates') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('candidatesTab').classList.add('active');
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('eventsTab').classList.add('active');
+            }
+        }
 
-    renderCandidates();
-    renderEvents();
-  </script>
+        // Авторизация
+        function openAdminAuthModal() {
+            document.getElementById('adminAuthModal').style.display = 'flex';
+        }
+
+        function loginAdmin() {
+            const pass = document.getElementById('adminPasswordInput').value;
+            if(pass === ADMIN_PASS) {
+                isAdmin = true;
+                document.getElementById('adminBanner').style.display = 'block';
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'inline-flex');
+                closeModal('adminAuthModal');
+                document.getElementById('adminPasswordInput').value = '';
+                renderCandidates();
+                renderEvents();
+            } else {
+                alert('Неверный пароль!');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdmin = false;
+            document.getElementById('adminBanner').style.display = 'none';
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            renderCandidates();
+            renderEvents();
+        }
+
+        // Отрисовка кандидатов
+        function renderCandidates() {
+            const container = document.getElementById('candidatesList');
+            container.innerHTML = '';
+
+            candidates.forEach(cand => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                let questionsHtml = cand.questions.map(q => `
+                    <div class="q-item">
+                        <span class="q-author">Вопрос от Админа:</span> ${q}
+                    </div>
+                `).join('');
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <div>
+                            <div class="candidate-name">${cand.name}</div>
+                            <div class="candidate-meta">${cand.grade} • ${cand.role}</div>
+                        </div>
+                        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteCandidate(${cand.id})">Удалить</button>` : ''}
+                    </div>
+                    <div class="program-title">📋 Предвыборная программа:</div>
+                    <div class="program-text">${cand.program}</div>
+
+                    <div class="questions-section">
+                        <div class="questions-title">💬 Вопросы от Администрации (${cand.questions.length}):</div>
+                        ${questionsHtml}
+                        ${isAdmin ? `<button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="openQuestionModal(${cand.id})">+ Задать вопрос</button>` : ''}
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Отрисовка мероприятий с кнопками Добавить в Календарь
+        function renderEvents() {
+            const container = document.getElementById('eventsList');
+            container.innerHTML = '';
+
+            events.forEach(event => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const formattedDate = new Date(event.date + 'T' + event.time).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+
+                // Формируем ссылку на Google Календарь
+                const gCalStart = event.date.replace(/-/g, '') + 'T' + event.time.replace(':', '') + '00';
+                const gCalEnd = event.date.replace(/-/g, '') + 'T' + (parseInt(event.time.split(':')[0]) + 1).toString().padStart(2, '0') + event.time.split(':')[1] + '00';
+                const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${gCalStart}/${gCalEnd}&details=${encodeURIComponent(event.desc)}`;
+
+                // Формируем .ics файл для Apple/Outlook Календаря
+                const icsData = `BEGIN:VCALENDAR\nVERSION:2.0\nBEGIN:VEVENT\nSUMMARY:${event.title}\nDESCRIPTION:${event.desc}\nDTSTART:${gCalStart}\nDTEND:${gCalEnd}\nEND:VEVENT\nEND:VCALENDAR`;
+                const icsBlobUrl = 'data:text/calendar;charset=utf8,' + encodeURIComponent(icsData);
+
+                card.innerHTML = `
+                    <div class="card-header">
+                        <span class="event-date">📅 ${formattedDate} в ${event.time}</span>
+                        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})">Удалить</button>` : ''}
+                    </div>
+                    <div class="event-title">${event.title}</div>
+                    <div class="event-desc">${event.desc}</div>
+                    
+                    <div class="cal-dropdown">
+                        <span style="font-size:0.8rem; color:var(--text-muted); align-self:center; font-weight:600;">Напомнить:</span>
+                        <a href="${gCalUrl}" target="_blank" class="cal-btn">🌐 Google Календарь</a>
+                        <a href="${icsBlobUrl}" download="${event.title}.ics" class="cal-btn">📱 Apple / Outlook</a>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        // Операции с кандидатами
+        function openCandidateModal() {
+            document.getElementById('candidateModal').style.display = 'flex';
+        }
+
+        function saveCandidate() {
+            const name = document.getElementById('candName').value;
+            const grade = document.getElementById('candClass').value;
+            const role = document.getElementById('candRole').value;
+            const program = document.getElementById('candProgram').value;
+
+            if(!name || !grade || !program) {
+                alert('Пожалуйста, заполните основные поля!');
+                return;
+            }
+
+            candidates.push({
+                id: Date.now(),
+                name, grade, role, program,
+                questions: []
+            });
+
+            saveData();
+            renderCandidates();
+            closeModal('candidateModal');
+
+            // Очистка полей
+            document.getElementById('candName').value = '';
+            document.getElementById('candClass').value = '';
+            document.getElementById('candRole').value = '';
+            document.getElementById('candProgram').value = '';
+        }
+
+        function deleteCandidate(id) {
+            if(confirm('Вы уверены, что хотите удалить этого кандидата?')) {
+                candidates = candidates.filter(c => c.id !== id);
+                saveData();
+                renderCandidates();
+            }
+        }
+
+        // Операции с вопросами
+        function openQuestionModal(candidateId) {
+            document.getElementById('targetCandidateId').value = candidateId;
+            document.getElementById('questionModal').style.display = 'flex';
+        }
+
+        function saveQuestion() {
+            const candidateId = parseInt(document.getElementById('targetCandidateId').value);
+            const text = document.getElementById('questionText').value;
+
+            if(!text) return;
+
+            const cand = candidates.find(c => c.id === candidateId);
+            if(cand) {
+                cand.questions.push(text);
+                saveData();
+                renderCandidates();
+            }
+
+            closeModal('questionModal');
+            document.getElementById('questionText').value = '';
+        }
+
+        // Операции с мероприятиями
+        function openEventModal() {
+            document.getElementById('eventModal').style.display = 'flex';
+        }
+
+        function saveEvent() {
+            const title = document.getElementById('eventTitle').value;
+            const date = document.getElementById('eventDate').value;
+            const time = document.getElementById('eventTime').value;
+            const desc = document.getElementById('eventDesc').value;
+
+            if(!title || !date) {
+                alert('Укажите название и дату мероприятия!');
+                return;
+            }
+
+            events.push({
+                id: Date.now(),
+                title, date, time, desc
+            });
+
+            saveData();
+            renderEvents();
+            closeModal('eventModal');
+
+            document.getElementById('eventTitle').value = '';
+            document.getElementById('eventDate').value = '';
+            document.getElementById('eventDesc').value = '';
+        }
+
+        function deleteEvent(id) {
+            if(confirm('Удалить мероприятие?')) {
+                events = events.filter(e => e.id !== id);
+                saveData();
+                renderEvents();
+            }
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+    </script>
 </body>
 </html>
