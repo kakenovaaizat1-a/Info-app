@@ -650,23 +650,27 @@
             renderEvents();
         }
 
-        function likeCandidate(id) {
+        function toggleLikeCandidate(id) {
             let myLikedCandidates = JSON.parse(localStorage.getItem('my_liked_candidates')) || [];
-
-            if (myLikedCandidates.includes(id)) {
-                alert('Вы уже поддержали этого кандидата!');
-                return;
-            }
-
             const cand = candidates.find(c => c.id === id);
-            if(cand) {
-                cand.likes = (cand.likes || 0) + 1;
+
+            if (!cand) return;
+
+            const index = myLikedCandidates.indexOf(id);
+
+            if (index !== -1) {
+                // Если лайк уже стоит — убираем его
+                myLikedCandidates.splice(index, 1);
+                cand.likes = Math.max(0, (cand.likes || 0) - 1);
+            } else {
+                // Если лайка нет — добавляем
                 myLikedCandidates.push(id);
-                localStorage.setItem('my_liked_candidates', JSON.stringify(myLikedCandidates));
-                
-                saveData();
-                renderCandidates();
+                cand.likes = (cand.likes || 0) + 1;
             }
+
+            localStorage.setItem('my_liked_candidates', JSON.stringify(myLikedCandidates));
+            saveData();
+            renderCandidates();
         }
 
         function renderCandidates() {
@@ -703,7 +707,7 @@
                             <div class="candidate-name">${cand.name}</div>
                             <div class="candidate-meta">${cand.grade} • ${cand.role}</div>
                         </div>
-                        <button class="${likeBtnClass}" onclick="likeCandidate(${cand.id})">
+                        <button class="${likeBtnClass}" onclick="toggleLikeCandidate(${cand.id})">
                             ${likeBtnText}
                         </button>
                         ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteCandidate(${cand.id})">✕</button>` : ''}
