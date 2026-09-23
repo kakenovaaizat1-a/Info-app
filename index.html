@@ -15,7 +15,18 @@
             --border: #e2e8f0;
             --accent-green: #10b981;
             --accent-red: #ef4444;
-            --accent-purple: #8b5cf6;
+            --input-bg: #ffffff;
+        }
+
+        [data-theme="dark"] {
+            --primary: #6366f1;
+            --primary-hover: #4f46e5;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            --input-bg: #334155;
         }
 
         * {
@@ -23,6 +34,7 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            transition: background-color 0.2s, color 0.2s;
         }
 
         body {
@@ -33,11 +45,11 @@
         }
 
         header {
-            background: linear-gradient(135deg, var(--primary), #6366f1);
+            background: linear-gradient(135deg, var(--primary), #818cf8);
             color: white;
             padding: 24px 16px;
             text-align: center;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             position: relative;
         }
 
@@ -51,16 +63,21 @@
             opacity: 0.9;
         }
 
-        .admin-trigger-btn {
+        .header-btns {
             position: absolute;
             top: 16px;
             right: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .icon-btn {
             background: rgba(255, 255, 255, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.4);
             color: white;
             padding: 6px 12px;
             border-radius: 20px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
             backdrop-filter: blur(4px);
         }
@@ -88,7 +105,7 @@
 
         .nav-tabs {
             display: flex;
-            background: white;
+            background: var(--card-bg);
             border-bottom: 1px solid var(--border);
             position: sticky;
             top: 0;
@@ -105,7 +122,6 @@
             color: var(--text-muted);
             cursor: pointer;
             border-bottom: 3px solid transparent;
-            transition: all 0.2s;
         }
 
         .tab-btn.active {
@@ -125,6 +141,22 @@
 
         .tab-content.active {
             display: block;
+        }
+
+        .search-bar {
+            margin-bottom: 16px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--input-bg);
+            color: var(--text);
+            font-size: 0.9rem;
         }
 
         .actions-bar {
@@ -150,16 +182,10 @@
             text-decoration: none;
         }
 
-        .btn-success {
-            background-color: var(--accent-green);
-        }
-
-        .btn-danger {
-            background-color: var(--accent-red);
-        }
-
+        .btn-success { background-color: var(--accent-green); }
+        .btn-danger { background-color: var(--accent-red); }
         .btn-outline {
-            background: white;
+            background: transparent;
             color: var(--primary);
             border: 1px solid var(--primary);
         }
@@ -175,14 +201,26 @@
             border: 1px solid var(--border);
             padding: 16px;
             margin-bottom: 16px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
         }
 
-        .card-header {
+        .candidate-header {
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .avatar {
+            width: 54px;
+            height: 54px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--primary);
+        }
+
+        .candidate-info {
+            flex-grow: 1;
         }
 
         .candidate-name {
@@ -195,17 +233,34 @@
             color: var(--text-muted);
         }
 
+        .like-btn {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid #fca5a5;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .like-btn:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
         .program-title {
             font-weight: 600;
             font-size: 0.9rem;
-            margin-top: 10px;
+            margin-top: 8px;
             margin-bottom: 4px;
-            color: var(--text);
         }
 
         .program-text {
             font-size: 0.9rem;
-            color: #475569;
+            color: var(--text-muted);
             white-space: pre-line;
         }
 
@@ -223,11 +278,12 @@
         }
 
         .q-item {
-            background: #f1f5f9;
+            background: var(--bg);
             padding: 8px 12px;
             border-radius: 6px;
             font-size: 0.85rem;
             margin-bottom: 6px;
+            border: 1px solid var(--border);
         }
 
         .q-author {
@@ -235,14 +291,38 @@
             color: var(--primary);
         }
 
+        .event-badge-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
         .event-date {
-            display: inline-block;
             background: #fef3c7;
             color: #92400e;
             font-weight: 700;
             padding: 4px 10px;
             border-radius: 6px;
             font-size: 0.85rem;
+        }
+
+        .event-location {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .timer-badge {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 4px 8px;
+            border-radius: 6px;
+            display: inline-block;
             margin-bottom: 8px;
         }
 
@@ -254,7 +334,7 @@
 
         .event-desc {
             font-size: 0.9rem;
-            color: #475569;
+            color: var(--text-muted);
             margin-bottom: 12px;
         }
 
@@ -269,17 +349,13 @@
             padding: 6px 10px;
             border-radius: 6px;
             border: 1px solid var(--border);
-            background: #f8fafc;
+            background: var(--bg);
             color: var(--text);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 4px;
             cursor: pointer;
-        }
-
-        .cal-btn:hover {
-            background: #e2e8f0;
         }
 
         .modal-overlay {
@@ -294,11 +370,13 @@
         }
 
         .modal {
-            background: white;
+            background: var(--card-bg);
+            color: var(--text);
             padding: 20px;
             border-radius: 12px;
             width: 100%;
             max-width: 450px;
+            border: 1px solid var(--border);
         }
 
         .modal h2 {
@@ -322,6 +400,8 @@
             padding: 8px 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
+            background: var(--input-bg);
+            color: var(--text);
             font-size: 0.9rem;
         }
 
@@ -336,7 +416,10 @@
 <body>
 
     <header>
-        <button class="admin-trigger-btn" onclick="openAdminAuthModal()">🔑 Админ</button>
+        <div class="header-btns">
+            <button class="icon-btn" onclick="toggleTheme()">🌙/☀️</button>
+            <button class="icon-btn" onclick="openAdminAuthModal()">🔑 Админ</button>
+        </div>
         <h1>Школьное Самоуправление</h1>
         <p>Кандидаты, программы и школьные мероприятия</p>
     </header>
@@ -354,15 +437,20 @@
 
         <!-- Вкладка Кандидаты -->
         <div id="candidatesTab" class="tab-content active">
+            <div class="search-bar">
+                <input type="text" id="candidateSearch" class="search-input" placeholder="🔍 Поиск кандидатов..." oninput="renderCandidates()">
+            </div>
             <div class="actions-bar">
                 <button class="btn" onclick="openCandidateModal()">🙋‍♂️ Стать кандидатом</button>
-                <button id="addCandidateAdminBtn" class="btn btn-success btn-sm admin-only" style="display:none;" onclick="openCandidateModal()">+ Админ</button>
             </div>
             <div id="candidatesList"></div>
         </div>
 
         <!-- Вкладка Мероприятия -->
         <div id="eventsTab" class="tab-content">
+            <div class="search-bar">
+                <input type="text" id="eventSearch" class="search-input" placeholder="🔍 Поиск мероприятий..." oninput="renderEvents()">
+            </div>
             <div class="actions-bar">
                 <button id="addEventAdminBtn" class="btn btn-success admin-only" style="display:none;" onclick="openEventModal()">+ Добавить мероприятие</button>
             </div>
@@ -392,7 +480,7 @@
             <h2>Регистрация кандидата</h2>
             <div class="form-group">
                 <label>ФИО ученика</label>
-                <input type="text" id="candName" placeholder="Например: Иван Иванов">
+                <input type="text" id="candName" placeholder="Например: Алина Искакова">
             </div>
             <div class="form-group">
                 <label>Класс</label>
@@ -401,6 +489,10 @@
             <div class="form-group">
                 <label>Желаемая должность</label>
                 <input type="text" id="candRole" placeholder="Например: Президент школы">
+            </div>
+            <div class="form-group">
+                <label>Ссылка на фото/аватарку (необязательно)</label>
+                <input type="text" id="candPhoto" placeholder="https://...">
             </div>
             <div class="form-group">
                 <label>Предвыборная программа</label>
@@ -446,6 +538,10 @@
                 <input type="time" id="eventTime" value="15:00">
             </div>
             <div class="form-group">
+                <label>Место проведения</label>
+                <input type="text" id="eventLocation" placeholder="Например: Актовый зал">
+            </div>
+            <div class="form-group">
                 <label>Описание</label>
                 <textarea id="eventDesc" rows="3" placeholder="Подробности события..."></textarea>
             </div>
@@ -460,12 +556,30 @@
         const ADMIN_PASS = "admin2026";
         let isAdmin = false;
 
+        // Восстановление темы из localStorage
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.setAttribute('data-theme', 'dark');
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            if (currentTheme === 'dark') {
+                document.documentElement.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
         let candidates = JSON.parse(localStorage.getItem('school_candidates')) || [
             {
                 id: 1,
                 name: "Айару Серикова",
                 grade: "11-Б",
                 role: "Президент школы",
+                photo: "https://api.dicebear.com/7.x/bottts/svg?seed=Aiaru",
+                likes: 12,
                 program: "1. Проведение еженедельных тематических пятниц.\n2. Установка новых лавочек в холле.\n3. Организация киберспортивного турнира.",
                 questions: ["Каким будет первый проект из вашей программы?"]
             }
@@ -477,6 +591,7 @@
                 title: "Предвыборные дебаты кандидатов",
                 date: "2026-09-25",
                 time: "15:00",
+                location: "Актовый зал",
                 desc: "Встреча кандидатов в президенты школы с избирателями в актовом зале. Ответы на вопросы."
             }
         ];
@@ -484,6 +599,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderCandidates();
             renderEvents();
+            setInterval(updateTimers, 1000); // Обновление таймеров каждую секунду
         });
 
         function saveData() {
@@ -531,33 +647,54 @@
             renderEvents();
         }
 
+        function likeCandidate(id) {
+            const cand = candidates.find(c => c.id === id);
+            if(cand) {
+                cand.likes = (cand.likes || 0) + 1;
+                saveData();
+                renderCandidates();
+            }
+        }
+
         function renderCandidates() {
             const container = document.getElementById('candidatesList');
+            const searchQuery = document.getElementById('candidateSearch')?.value.toLowerCase() || '';
             container.innerHTML = '';
 
-            candidates.forEach(cand => {
+            const filtered = candidates.filter(c => 
+                c.name.toLowerCase().includes(searchQuery) || 
+                c.role.toLowerCase().includes(searchQuery)
+            );
+
+            filtered.forEach(cand => {
                 const card = document.createElement('div');
                 card.className = 'card';
 
-                let questionsHtml = cand.questions.map(q => `
+                const photoUrl = cand.photo || `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(cand.name)}`;
+
+                let questionsHtml = (cand.questions || []).map(q => `
                     <div class="q-item">
                         <span class="q-author">Вопрос от Админа:</span> ${q}
                     </div>
                 `).join('');
 
                 card.innerHTML = `
-                    <div class="card-header">
-                        <div>
+                    <div class="candidate-header">
+                        <img src="${photoUrl}" alt="${cand.name}" class="avatar">
+                        <div class="candidate-info">
                             <div class="candidate-name">${cand.name}</div>
                             <div class="candidate-meta">${cand.grade} • ${cand.role}</div>
                         </div>
-                        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteCandidate(${cand.id})">Удалить</button>` : ''}
+                        <button class="like-btn" onclick="likeCandidate(${cand.id})">
+                            ❤️ ${cand.likes || 0}
+                        </button>
+                        ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteCandidate(${cand.id})">✕</button>` : ''}
                     </div>
                     <div class="program-title">📋 Предвыборная программа:</div>
                     <div class="program-text">${cand.program}</div>
 
                     <div class="questions-section">
-                        <div class="questions-title">💬 Вопросы от Администрации (${cand.questions.length}):</div>
+                        <div class="questions-title">💬 Вопросы от Администрации (${(cand.questions || []).length}):</div>
                         ${questionsHtml}
                         ${isAdmin ? `<button class="btn btn-outline btn-sm" style="margin-top:8px;" onclick="openQuestionModal(${cand.id})">+ Задать вопрос</button>` : ''}
                     </div>
@@ -568,16 +705,20 @@
 
         function renderEvents() {
             const container = document.getElementById('eventsList');
+            const searchQuery = document.getElementById('eventSearch')?.value.toLowerCase() || '';
             container.innerHTML = '';
 
-            events.forEach(event => {
+            const filtered = events.filter(e => 
+                e.title.toLowerCase().includes(searchQuery) || 
+                (e.location && e.location.toLowerCase().includes(searchQuery))
+            );
+
+            filtered.forEach(event => {
                 const card = document.createElement('div');
                 card.className = 'card';
 
                 const formattedDate = new Date(event.date + 'T' + event.time).toLocaleDateString('ru-RU', {
-                    day: 'numeric',
-                    month: 'long',
-                    year: 'numeric'
+                    day: 'numeric', month: 'long', year: 'numeric'
                 });
 
                 const startDateStr = event.date.replace(/-/g, '') + 'T' + event.time.replace(':', '') + '00';
@@ -585,7 +726,7 @@
                 const endHour = (startHour + 1).toString().padStart(2, '0');
                 const endDateStr = event.date.replace(/-/g, '') + 'T' + endHour + event.time.split(':')[1] + '00';
 
-                const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateStr}/${endDateStr}&details=${encodeURIComponent(event.desc)}`;
+                const gCalUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(event.title)}&dates=${startDateStr}/${endDateStr}&details=${encodeURIComponent(event.desc)}&location=${encodeURIComponent(event.location || '')}`;
 
                 const icsContent = [
                     'BEGIN:VCALENDAR',
@@ -594,6 +735,7 @@
                     'BEGIN:VEVENT',
                     `SUMMARY:${event.title}`,
                     `DESCRIPTION:${event.desc}`,
+                    `LOCATION:${event.location || ''}`,
                     `DTSTART:${startDateStr}`,
                     `DTEND:${endDateStr}`,
                     'END:VEVENT',
@@ -601,10 +743,12 @@
                 ].join('\n');
 
                 card.innerHTML = `
-                    <div class="card-header">
+                    <div class="event-badge-row">
                         <span class="event-date">📅 ${formattedDate} в ${event.time}</span>
+                        ${event.location ? `<span class="event-location">📍 ${event.location}</span>` : ''}
                         ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteEvent(${event.id})">Удалить</button>` : ''}
                     </div>
+                    <div class="timer-badge" id="timer-${event.id}">⏱️ Вычисляется...</div>
                     <div class="event-title">${event.title}</div>
                     <div class="event-desc">${event.desc}</div>
                     
@@ -615,6 +759,31 @@
                     </div>
                 `;
                 container.appendChild(card);
+            });
+
+            updateTimers();
+        }
+
+        function updateTimers() {
+            events.forEach(event => {
+                const timerEl = document.getElementById(`timer-${event.id}`);
+                if (!timerEl) return;
+
+                const eventTime = new Date(event.date + 'T' + event.time).getTime();
+                const now = new Date().getTime();
+                const diff = eventTime - now;
+
+                if (diff <= 0) {
+                    timerEl.innerText = "🎉 Мероприятие уже проходит или завершено";
+                    timerEl.style.background = "rgba(16, 185, 129, 0.1)";
+                    timerEl.style.color = "var(--accent-green)";
+                } else {
+                    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+                    timerEl.innerText = `⏱️ До начала: ${days}д ${hours}ч ${minutes}м ${seconds}с`;
+                }
             });
         }
 
@@ -630,14 +799,14 @@
             document.body.removeChild(link);
         }
 
-        function openCandidateModal() {
-            document.getElementById('candidateModal').style.display = 'flex';
-        }
+        function openCandidateModal() { document.getElementById('candidateModal').style.display = 'flex'; }
+        function openEventModal() { document.getElementById('eventModal').style.display = 'flex'; }
 
         function saveCandidate() {
             const name = document.getElementById('candName').value;
             const grade = document.getElementById('candClass').value;
             const role = document.getElementById('candRole').value;
+            const photo = document.getElementById('candPhoto').value;
             const program = document.getElementById('candProgram').value;
 
             if(!name || !grade || !program) {
@@ -647,7 +816,8 @@
 
             candidates.push({
                 id: Date.now(),
-                name, grade, role, program,
+                name, grade, role, photo, program,
+                likes: 0,
                 questions: []
             });
 
@@ -658,6 +828,7 @@
             document.getElementById('candName').value = '';
             document.getElementById('candClass').value = '';
             document.getElementById('candRole').value = '';
+            document.getElementById('candPhoto').value = '';
             document.getElementById('candProgram').value = '';
         }
 
@@ -682,6 +853,7 @@
 
             const cand = candidates.find(c => c.id === candidateId);
             if(cand) {
+                if(!cand.questions) cand.questions = [];
                 cand.questions.push(text);
                 saveData();
                 renderCandidates();
@@ -691,14 +863,11 @@
             document.getElementById('questionText').value = '';
         }
 
-        function openEventModal() {
-            document.getElementById('eventModal').style.display = 'flex';
-        }
-
         function saveEvent() {
             const title = document.getElementById('eventTitle').value;
             const date = document.getElementById('eventDate').value;
             const time = document.getElementById('eventTime').value;
+            const location = document.getElementById('eventLocation').value;
             const desc = document.getElementById('eventDesc').value;
 
             if(!title || !date) {
@@ -708,7 +877,7 @@
 
             events.push({
                 id: Date.now(),
-                title, date, time, desc
+                title, date, time, location, desc
             });
 
             saveData();
@@ -717,6 +886,7 @@
 
             document.getElementById('eventTitle').value = '';
             document.getElementById('eventDate').value = '';
+            document.getElementById('eventLocation').value = '';
             document.getElementById('eventDesc').value = '';
         }
 
