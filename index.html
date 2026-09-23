@@ -245,10 +245,13 @@
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            transition: all 0.2s;
         }
 
-        .like-btn:hover {
-            background: rgba(239, 68, 68, 0.2);
+        .like-btn.liked {
+            background: #ef4444;
+            color: white;
+            border-color: #ef4444;
         }
 
         .program-title {
@@ -491,8 +494,8 @@
                 <input type="text" id="candRole" placeholder="Например: Президент школы">
             </div>
             <div class="form-group">
-                <label>Ссылка на фото/аватарку (необязательно)</label>
-                <input type="text" id="candPhoto" placeholder="https://...">
+                <label>Загрузить фото из галереи</label>
+                <input type="file" id="candPhotoInput" accept="image/*">
             </div>
             <div class="form-group">
                 <label>Предвыборная программа</label>
@@ -599,7 +602,7 @@
         document.addEventListener('DOMContentLoaded', () => {
             renderCandidates();
             renderEvents();
-            setInterval(updateTimers, 1000); // Обновление таймеров каждую секунду
+            setInterval(updateTimers, 1000);
         });
 
         function saveData() {
@@ -648,9 +651,19 @@
         }
 
         function likeCandidate(id) {
+            let myLikedCandidates = JSON.parse(localStorage.getItem('my_liked_candidates')) || [];
+
+            if (myLikedCandidates.includes(id)) {
+                alert('Вы уже поддержали этого кандидата!');
+                return;
+            }
+
             const cand = candidates.find(c => c.id === id);
             if(cand) {
                 cand.likes = (cand.likes || 0) + 1;
+                myLikedCandidates.push(id);
+                localStorage.setItem('my_liked_candidates', JSON.stringify(myLikedCandidates));
+                
                 saveData();
                 renderCandidates();
             }
@@ -659,6 +672,7 @@
         function renderCandidates() {
             const container = document.getElementById('candidatesList');
             const searchQuery = document.getElementById('candidateSearch')?.value.toLowerCase() || '';
+            const myLikedCandidates = JSON.parse(localStorage.getItem('my_liked_candidates')) || [];
             container.innerHTML = '';
 
             const filtered = candidates.filter(c => 
@@ -678,6 +692,10 @@
                     </div>
                 `).join('');
 
+                const isLiked = myLikedCandidates.includes(cand.id);
+                const likeBtnClass = isLiked ? 'like-btn liked' : 'like-btn';
+                const likeBtnText = isLiked ? `❤️ ${cand.likes || 0} (Вы)` : `🤍 ${cand.likes || 0}`;
+
                 card.innerHTML = `
                     <div class="candidate-header">
                         <img src="${photoUrl}" alt="${cand.name}" class="avatar">
@@ -685,8 +703,8 @@
                             <div class="candidate-name">${cand.name}</div>
                             <div class="candidate-meta">${cand.grade} • ${cand.role}</div>
                         </div>
-                        <button class="like-btn" onclick="likeCandidate(${cand.id})">
-                            ❤️ ${cand.likes || 0}
+                        <button class="${likeBtnClass}" onclick="likeCandidate(${cand.id})">
+                            ${likeBtnText}
                         </button>
                         ${isAdmin ? `<button class="btn btn-danger btn-sm" onclick="deleteCandidate(${cand.id})">✕</button>` : ''}
                     </div>
@@ -806,30 +824,46 @@
             const name = document.getElementById('candName').value;
             const grade = document.getElementById('candClass').value;
             const role = document.getElementById('candRole').value;
-            const photo = document.getElementById('candPhoto').value;
             const program = document.getElementById('candProgram').value;
+            const fileInput = document.getElementById('candPhotoInput');
 
             if(!name || !grade || !program) {
                 alert('Заполните основные поля!');
                 return;
             }
 
-            candidates.push({
-                id: Date.now(),
-                name, grade, role, photo, program,
-                likes: 0,
-                questions: []
-            });
+            const file = fileInput.files[0];
 
-            saveData();
-            renderCandidates();
-            closeModal('candidateModal');
+            const createAndSave = (photoDataUrl) => {
+                candidates.push({
+                    id: Date.now(),
+                    name, grade, role, 
+                    photo: photoDataUrl || '', 
+                    program,
+                    likes: 0,
+                    questions: []
+                });
 
-            document.getElementById('candName').value = '';
-            document.getElementById('candClass').value = '';
-            document.getElementById('candRole').value = '';
-            document.getElementById('candPhoto').value = '';
-            document.getElementById('candProgram').value = '';
+                saveData();
+                renderCandidates();
+                closeModal('candidateModal');
+
+                document.getElementById('candName').value = '';
+                document.getElementById('candClass').value = '';
+                document.getElementById('candRole').value = '';
+                document.getElementById('candPhotoInput').value = '';
+                document.getElementById('candProgram').value = '';
+            };
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    createAndSave(e.target.result);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                createAndSave('');
+            }
         }
 
         function deleteCandidate(id) {
